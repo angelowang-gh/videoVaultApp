@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试可收起/展开的横向操作栏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #f8fafc;
+            font-size: 2rem;
+        }
+        
+        .description {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #94a3b8;
+            line-height: 1.6;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .demo-section {
+            margin-bottom: 60px;
+        }
+        
+        .demo-section h2 {
+            margin-bottom: 20px;
+            color: #f8fafc;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 8px;
+        }
+        
+        /* Video Card Demo */
+        .video-card-demo {
+            background: #1e293b;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid #334155;
+            transition: all 0.3s ease;
+            position: relative;
+            width: 320px;
+            margin: 0 auto 30px;
+        }
+        
+        .video-card-demo:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: #3b82f6;
+        }
+        
+        .thumbnail-container {
+            position: relative;
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            overflow: hidden;
+        }
+        
+        .thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .thumbnail-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0);
+            transition: all 0.3s ease;
+        }
+        
+        .play-button {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.75);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            cursor: pointer;
+        }
+        
+        .video-card-demo:hover .thumbnail-overlay {
+            background: rgba(15, 23, 42, 0.4);
+        }
+        
+        .video-card-demo:hover .play-button {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .play-icon {
+            width: 20px;
+            height: 20px;
+            color: white;
+            margin-left: 3px;
+        }
+        
+        /* Collapsible Bar Styles */
+        .collapsible-bar {
+            position: relative;
+            border-top: 1px solid rgba(51, 65, 85, 0.5);
+            background: #1e293b;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .bar-expanded {
+            height: 40px;
+        }
+        
+        .bar-collapsed {
+            height: 24px;
+        }
+        
+        .bar-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+        }
+        
+        .bar-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .bar-indicator {
+            height: 8px;
+            width: 64px;
+            border-radius: 4px;
+            background: rgba(59, 130, 246, 0.2);
+        }
+        
+        .bar-text {
+            font-size: 12px;
+            font-weight: 500;
+            color: #94a3b8;
+        }
+        
+        .toggle-btn {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .toggle-btn:hover {
+            background: rgba(30, 41, 59, 0.5);
+        }
+        
+        .toggle-icon {
+            width: 14px;
+            height: 14px;
+            color: #94a3b8;
+        }
+        
+        .bar-content {
+            padding-top: 24px;
+            padding-left: 12px;
+            padding-right: 12px;
+            padding-bottom: 4px;
+        }
+        
+        .bar-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            height: 28px;
+            padding: 0 10px;
+            border-radius: 6px;
+            background: rgba(15, 23, 42, 0.8);
+            border: none;
+            color: #e2e8f0;
+            font-size: 11px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .action-btn:hover {
+            background: #0f172a;
+            transform: translateY(-1px);
+        }
+        
+        .action-icon {
+            width: 12px;
+            height: 12px;
+        }
+        
+        .info-badges {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .rating-badge {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+        }
+        
+        .star-icon {
+            width: 12px;
+            height: 12px;
+            color: #fbbf24;
+            fill: #fbbf24;
+        }
+        
+        .duration-badge {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: #94a3b8;
+        }
+        
+        .timer-icon {
+            width: 12px;
+            height: 12px;
+        }
+        
+        /* Video Info Section */
+        .video-info {
+            padding: 12px;
+        }
+        
+        .video-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #f8fafc;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .video-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 11px;
+            color: #94a3b8;
+        }
+        
+        /* Controls and Status */
+        .controls {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 40px;
+            border: 1px solid #334155;
+        }
+        
+        .controls h2 {
+            margin-bottom: 16px;
+            color: #f8fafc;
+        }
+        
+        .controls p {
+            margin-bottom: 16px;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+        
+        .control-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .control-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            background: #3b82f6;
+            border: none;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .control-btn:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+        
+        .control-btn.secondary {
+            background: #334155;
+        }
+        
+        .control-btn.secondary:hover {
+            background: #475569;
+        }
+        
+        .status {
+            padding: 12px 16px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+            margin-top: 16px;
+            font-family: monospace;
+            color: #e2e8f0;
+        }
+        
+        .status.success {
+            border-left-color: #10b981;
+        }
+        
+        .status.error {
+            border-left-color: #ef4444;
+        }
+        
+        .status.info {
+            border-left-color: #3b82f6;
+        }
+        
+        /* List Item Demo */
+        .list-item-demo {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid #334155;
+            margin-bottom: 30px;
+            width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .list-content {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .list-thumbnail {
+            width: 112px;
+            height: 64px;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .list-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .list-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .list-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: #f8fafc;
+        }
+        
+        .list-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 11px;
+            color: #94a3b8;
+        }
+        
+        /* Smaller bar for list item */
+        .small-collapsible-bar {
+            height: 20px;
+        }
+        
+        .small-bar-expanded {
+            height: 36px;
+        }
+        
+        .small-bar-header {
+            height: 20px;
+            padding: 0 8px;
+        }
+        
+        .small-bar-indicator {
+            height: 6px;
+            width: 48px;
+        }
+        
+        .small-bar-text {
+            font-size: 10px;
+        }
+        
+        .small-toggle-btn {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .small-toggle-icon {
+            width: 10px;
+            height: 10px;
+        }
+        
+        .small-bar-content {
+            padding-top: 20px;
+            padding-left: 8px;
+            padding-right: 8px;
+        }
+        
+        .small-action-btn {
+            height: 24px;
+            padding: 0 8px;
+            font-size: 10px;
+        }
+        
+        .small-action-icon {
+            width: 10px;
+            height: 10px;
+        }
+        
+        .small-rating-badge {
+            font-size: 10px;
+        }
+        
+        .small-star-icon {
+            width: 10px;
+            height: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>可收起/展开的横向操作栏功能测试</h1>
+        
+        <div class="description">
+            <p>已在视频卡片缩略图区域下方添加可收起/展开的横向操作栏。</p>
+            <p>该功能已实现：</p>
+            <ul style="text-align: left; max-width: 600px; margin: 0 auto;">
+                <li>横向bar位于缩略图下方，包含快速操作按钮</li>
+                <li>点击右上角箭头按钮可收起/展开bar</li>
+                <li>展开时显示播放、标签、详情等操作按钮</li>
+                <li>收起时只显示标题和展开按钮</li>
+                <li>适配两种视图模式（卡片视图和列表视图）</li>
+            </ul>
+        </div>
+        
+        <!-- Demo 1: Video Card View -->
+        <div class="demo-section">
+            <h2>卡片视图演示</h2>
+            
+            <div class="video-card-demo">
+                <div class="thumbnail-container">
+                    <img src="https://images.unsplash.com/photo-1682687982468-4584ff11f88a?w=800&h=450&fit=crop" alt="视频缩略图" class="thumbnail">
+                    <div class="thumbnail-overlay">
+                        <div class="play-button">
+                            <svg class="play-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Collapsible Bar -->
+                <div id="cardBar" class="collapsible-bar bar-expanded">
+                    <div class="bar-header">
+                        <div class="bar-title">
+                            <div class="bar-indicator"></div>
+                            <span class="bar-text">快速操作</span>
+                        </div>
+                        <button id="cardToggleBtn" class="toggle-btn" title="收起操作栏">
+                            <svg id="cardToggleIcon" class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div id="cardBarContent" class="bar-content">
+                        <div class="bar-actions">
+                            <div class="action-buttons">
+                                <button class="action-btn" onclick="playVideo('demo1')">
+                                    <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polygon points="5 3 19 12 5 21 5 3" />
+                                    </svg>
+                                    播放
+                                </button>
+                                <button class="action-btn" onclick="manageTags('demo1')">
+                                    <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                    </svg>
+                                    标签
+                                </button>
+                                <button class="action-btn" onclick="showDetails('demo1')">
+                                    <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    详情
+                                </button>
+                            </div>
+                            
+                            <div class="info-badges">
+                                <div class="rating-badge">
+                                    <svg class="star-icon" viewBox="0 0 24 24">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                    </svg>
+                                    <span>4/5</span>
+                                </div>
+                                <div class="duration-badge">
+                                    <svg class="timer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M12 6v6l4 2" />
+                                    </svg>
+                                    <span>2:30</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="video-info">
+                    <div class="video-title">海滩日落景色 - 放松音乐背景</div>
+                    <div class="video-meta">
+                        <span>128 MB</span>
+                        <span>2026-04-10</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Demo 2: List Item View -->
+        <div class="demo-section">
+            <h2>列表视图演示</h2>
+            
+            <div class="list-item-demo">
+                <div class="list-content">
+                    <div class="list-thumbnail">
+                        <img src="https://images.unsplash.com/photo-1682687220640-9d3b11ca30e5?w=800&h=450&fit=crop" alt="视频缩略图">
+                    </div>
+                    <div class="list-info">
+                        <div class="list-title">城市夜景延时摄影 - 车流灯光轨迹</div>
+                        <div class="list-meta">
+                            <span>256 MB</span>
+                            <span>2026-04-05</span>
+                            <span>1080p</span>
+                            <span>MP4</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Smaller collapsible bar for list item -->
+                <div id="listBar" class="collapsible-bar small-collapsible-bar bar-expanded">
+                    <div class="bar-header small-bar-header">
+                        <div class="bar-title">
+                            <div class="bar-indicator small-bar-indicator"></div>
+                            <span class="bar-text small-bar-text">操作</span>
+                        </div>
+                        <button id="listToggleBtn" class="toggle-btn small-toggle-btn" title="收起操作栏">
+                            <svg id="listToggleIcon" class="toggle-icon small-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div id="listBarContent" class="bar-content small-bar-content">
+                        <div class="bar-actions">
+                            <div class="action-buttons">
+                                <button class="action-btn small-action-btn" onclick="playVideo('demo2')">
+                                    <svg class="action-icon small-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polygon points="5 3 19 12 5 21 5 3" />
+                                    </svg>
+                                    播放
+                                </button>
+                                <button class="action-btn small-action-btn" onclick="manageTags('demo2')">
+                                    <svg class="action-icon small-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                    </svg>
+                                    标签
+                                </button>
+                            </div>
+                            
+                            <div class="info-badges">
+                                <div class="rating-badge small-rating-badge">
+                                    <svg class="star-icon small-star-icon" viewBox="0 0 24 24">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                    </svg>
+                                    <span>3</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Controls and Status -->
+        <div class="controls">
+            <h2>功能控制</h2>
+            <p>点击下面的按钮测试不同功能，或直接点击演示中的操作栏按钮。</p>
+            
+            <div class="control-buttons">
+                <button class="control-btn" onclick="toggleCardBar()">切换卡片操作栏</button>
+                <button class="control-btn" onclick="toggleListBar()">切换列表操作栏</button>
+                <button class="control-btn secondary" onclick="expandAllBars()">全部展开</button>
+                <button class="control-btn secondary" onclick="collapseAllBars()">全部收起</button>
+            </div>
+            
+            <div id="status" class="status info">
+                状态: 操作栏已全部展开。点击上方按钮或演示中的箭头按钮测试收起/展开功能。
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // State variables
+        let isCardBarExpanded = true;
+        let isListBarExpanded = true;
+        
+        // Get DOM elements
+        const cardBar = document.getElementById('cardBar');
+        const cardToggleBtn = document.getElementById('cardToggleBtn');
+        const cardToggleIcon = document.getElementById('cardToggleIcon');
+        const cardBarContent = document.getElementById('cardBarContent');
+        
+        const listBar = document.getElementById('listBar');
+        const listToggleBtn = document.getElementById('listToggleBtn');
+        const listToggleIcon = document.getElementById('listToggleIcon');
+        const listBarContent = document.getElementById('listBarContent');
+        
+        const statusEl = document.getElementById('status');
+        
+        // Card bar toggle function
+        function toggleCardBar() {
+            isCardBarExpanded = !isCardBarExpanded;
+            updateCardBar();
+            updateStatus();
+        }
+        
+        // List bar toggle function
+        function toggleListBar() {
+            isListBarExpanded = !isListBarExpanded;
+            updateListBar();
+            updateStatus();
+        }
+        
+        // Update card bar appearance
+        function updateCardBar() {
+            if (isCardBarExpanded) {
+                cardBar.classList.remove('bar-collapsed');
+                cardBar.classList.add('bar-expanded');
+                cardToggleIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />';
+                cardToggleBtn.title = '收起操作栏';
+                cardBarContent.style.display = 'block';
+            } else {
+                cardBar.classList.remove('bar-expanded');
+                cardBar.classList.add('bar-collapsed');
+                cardToggleIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />';
+                cardToggleBtn.title = '展开操作栏';
+                cardBarContent.style.display = 'none';
+            }
+        }
+        
+        // Update list bar appearance
+        function updateListBar() {
+            if (isListBarExpanded) {
+                listBar.classList.remove('bar-collapsed');
+                listBar.classList.add('small-bar-expanded');
+                listToggleIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />';
+                listToggleBtn.title = '收起操作栏';
+                listBarContent.style.display = 'block';
+            } else {
+                listBar.classList.remove('small-bar-expanded');
+                listBar.classList.add('bar-collapsed');
+                listToggleIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />';
+                listToggleBtn.title = '展开操作栏';
+                listBarContent.style.display = 'none';
+            }
+        }
+        
+        // Expand all bars
+        function expandAllBars() {
+            isCardBarExpanded = true;
+            isListBarExpanded = true;
+            updateCardBar();
+            updateListBar();
+            updateStatus();
+            statusEl.textContent = '✓ 所有操作栏已展开';
+            statusEl.className = 'status success';
+        }
+        
+        // Collapse all bars
+        function collapseAllBars() {
+            isCardBarExpanded = false;
+            isListBarExpanded = false;
+            updateCardBar();
+            updateListBar();
+            updateStatus();
+            statusEl.textContent = '✓ 所有操作栏已收起';
+            statusEl.className = 'status info';
+        }
+        
+        // Update status message
+        function updateStatus() {
+            const cardState = isCardBarExpanded ? '展开' : '收起';
+            const listState = isListBarExpanded ? '展开' : '收起';
+            statusEl.textContent = `卡片操作栏: ${cardState} | 列表操作栏: ${listState}`;
+            statusEl.className = 'status info';
+        }
+        
+        // Action button handlers
+        function playVideo(videoId) {
+            statusEl.textContent = `正在播放视频 ${videoId}...（演示模式）`;
+            statusEl.className = 'status success';
+            console.log(`播放视频: ${videoId}`);
+        }
+        
+        function manageTags(videoId) {
+            statusEl.textContent = `正在管理视频 ${videoId} 的标签...（演示模式）`;
+            statusEl.className = 'status success';
+            console.log(`管理标签: ${videoId}`);
+        }
+        
+        function showDetails(videoId) {
+            statusEl.textContent = `正在显示视频 ${videoId} 的详细信息...（演示模式）`;
+            statusEl.className = 'status success';
+            console.log(`显示详情: ${videoId}`);
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listeners to toggle buttons
+            cardToggleBtn.addEventListener('click', toggleCardBar);
+            listToggleBtn.addEventListener('click', toggleListBar);
+            
+            // Initialize bars
+            updateCardBar();
+            updateListBar();
+            updateStatus();
+            
+            console.log('可收起/展开的横向操作栏演示已加载');
+            console.log('功能说明：');
+            console.log('1. 卡片视图有完整操作栏（播放、标签、详情按钮）');
+            console.log('2. 列表视图有简化操作栏（播放、标签按钮）');
+            console.log('3. 两种视图的操作栏都可以独立收起/展开');
+            console.log('4. 在真实应用中，这些按钮将连接到实际的视频操作功能');
+        });
+    </script>
+</body>
+</html>
