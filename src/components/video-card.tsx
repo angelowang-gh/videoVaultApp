@@ -6,7 +6,7 @@ import { ORIENTATION_LABELS, DURATION_LABELS } from '@/lib/types'
 import { Play, Tag, Clock, HardDrive, Star, Monitor, Smartphone, Timer, ExternalLink, Maximize2, PlusCircle } from 'lucide-react'
 import { TagBadge } from './tag-badge'
 import { cn } from '@/lib/utils'
-import { Thumbnail } from './thumbnail'
+import { Thumbnail, ThumbnailPreview } from './thumbnail'
 
 interface VideoCardProps {
   video: VideoFile
@@ -33,6 +33,7 @@ function MiniStars({ rating }: { rating: number }) {
 export function VideoCard({ video, onAddToPlaylist }: VideoCardProps) {
   const { tags } = useApp()
   const [showTagMenu, setShowTagMenu] = useState(false)
+  const [isHovering, setIsHovering] = useState(false)
   const videoTags = tags.filter(t => video.tagIds.includes(t.id))
 
   const playerUrl = `/video/${video.id}`
@@ -74,9 +75,15 @@ export function VideoCard({ video, onAddToPlaylist }: VideoCardProps) {
       title="拖拽到下方播放列表区域添加"
     >
       {/* Thumbnail container */}
-      <div className="relative block aspect-video bg-surface cursor-pointer overflow-hidden">
+      <div 
+        className="relative block aspect-video bg-surface cursor-pointer overflow-hidden"
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+      >
         {/* 静态缩略图 */}
-        <Thumbnail videoId={video.id} className="group-hover:scale-105 transition-transform duration-300 ease-out" />
+        <Thumbnail videoId={video.id} className={cn("group-hover:scale-105 transition-transform duration-300 ease-out", isHovering && "opacity-0")} />
+        {/* 悬停预览帧 */}
+        <ThumbnailPreview videoId={video.id} isHovering={isHovering} />
 
         {/* Play overlay with click to open popup */}
         <div 
@@ -240,6 +247,7 @@ export function VideoCard({ video, onAddToPlaylist }: VideoCardProps) {
 export function VideoListItem({ video, onAddToPlaylist }: VideoCardProps) {
   const { tags } = useApp()
   const [showTagMenu, setShowTagMenu] = useState(false)
+  const [isHovering, setIsHovering] = useState(false)
   const videoTags = tags.filter(t => video.tagIds.includes(t.id))
 
   const playerUrl = `/video/${video.id}`
@@ -281,9 +289,15 @@ export function VideoListItem({ video, onAddToPlaylist }: VideoCardProps) {
       title="拖拽到下方播放列表区域添加"
     >
       {/* Mini thumbnail container */}
-      <div className="relative block h-16 w-28 shrink-0 rounded-lg bg-surface overflow-hidden cursor-pointer">
+      <div 
+        className="relative block h-16 w-28 shrink-0 rounded-lg bg-surface overflow-hidden cursor-pointer"
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+      >
         {/* 静态缩略图 */}
-        <Thumbnail videoId={video.id} className="rounded-lg" />
+        <Thumbnail videoId={video.id} className={cn("rounded-lg", isHovering && "opacity-0")} />
+        {/* 悬停预览帧 */}
+        <ThumbnailPreview videoId={video.id} isHovering={isHovering} />
         <div 
           className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-smooth bg-background/30 cursor-pointer"
           onClick={handleOpenInPopup}
