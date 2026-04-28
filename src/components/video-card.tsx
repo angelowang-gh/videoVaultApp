@@ -3,7 +3,7 @@ import { useApp } from '@/lib/store'
 import { formatFileSize, formatDuration } from '@/lib/utils'
 import type { VideoFile } from '@/lib/types'
 import { ORIENTATION_LABELS, DURATION_LABELS } from '@/lib/types'
-import { Play, Tag, Clock, HardDrive, Star, Monitor, Smartphone, Timer, ExternalLink, Maximize2, PlusCircle } from 'lucide-react'
+import { Tag, Clock, HardDrive, Star, Monitor, Smartphone, Timer, ExternalLink, Maximize2, PlusCircle } from 'lucide-react'
 import { TagBadge } from './tag-badge'
 import { cn } from '@/lib/utils'
 import { Thumbnail, ThumbnailPreview } from './thumbnail'
@@ -85,16 +85,12 @@ export function VideoCard({ video, onAddToPlaylist }: VideoCardProps) {
         {/* 悬停预览帧 */}
         <ThumbnailPreview videoId={video.id} isHovering={isHovering} />
 
-        {/* Play overlay with click to open popup */}
+        {/* 点击区域 - 无蒙版无播放按钮 */}
         <div 
-          className="absolute inset-0 flex items-center justify-center bg-background/0 group-hover:bg-background/40 transition-smooth cursor-pointer"
+          className="absolute inset-0 cursor-pointer"
           onClick={handleOpenInPopup}
           title="点击开窗播放视频"
-        >
-          <div className="h-12 w-12 rounded-full gradient-primary flex items-center justify-center opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-smooth shadow-glow">
-            <Play className="h-5 w-5 text-primary-foreground ml-0.5" />
-          </div>
-        </div>
+        />
 
         {/* Top badges row */}
         <div className="absolute top-2 left-2 right-2 flex items-start justify-between pointer-events-none">
@@ -298,15 +294,12 @@ export function VideoListItem({ video, onAddToPlaylist }: VideoCardProps) {
         <Thumbnail videoId={video.id} className={cn("rounded-lg", isHovering && "opacity-0")} />
         {/* 悬停预览帧 */}
         <ThumbnailPreview videoId={video.id} isHovering={isHovering} />
+        {/* 点击区域 - 无蒙版无播放按钮 */}
         <div 
-          className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-smooth bg-background/30 cursor-pointer"
+          className="absolute inset-0 cursor-pointer"
           onClick={handleOpenInPopup}
           title="点击开窗播放视频"
-        >
-          <div className="h-8 w-8 rounded-full gradient-primary flex items-center justify-center shadow-glow">
-            <Play className="h-3.5 w-3.5 text-primary-foreground ml-0.5" />
-          </div>
-        </div>
+        />
         {/* Badges inside thumbnail */}
         {video.meta.resolution && (
           <div className="absolute top-1 left-1 rounded bg-primary/90 px-1 py-0.5 text-[8px] font-bold text-primary-foreground backdrop-blur-sm">
@@ -315,28 +308,6 @@ export function VideoListItem({ video, onAddToPlaylist }: VideoCardProps) {
         )}
         <div className="absolute top-1 right-1 rounded bg-background/80 px-1 py-0.5 text-[9px] font-bold uppercase text-muted-foreground backdrop-blur-sm">
           {video.extension}
-        </div>
-        
-        {/* Play buttons overlay */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-smooth flex items-center justify-center opacity-0 group-hover:opacity-100">
-          <div className="flex gap-1">
-            <button
-              onClick={handleOpenInPopup}
-              className="pointer-events-auto rounded-md bg-background/90 px-2 py-1 text-[9px] font-medium text-foreground hover:bg-background hover:text-primary backdrop-blur-sm flex items-center gap-1 transition-smooth hover:scale-105"
-              title="开窗播放"
-            >
-              <Maximize2 className="h-2.5 w-2.5" />
-            </button>
-            <a
-              href={playerUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="pointer-events-auto rounded-md bg-background/90 px-2 py-1 text-[9px] font-medium text-foreground hover:bg-background hover:text-primary backdrop-blur-sm flex items-center gap-1 transition-smooth hover:scale-105 no-underline"
-              title="新标签页播放"
-            >
-              <ExternalLink className="h-2.5 w-2.5" />
-            </a>
-          </div>
         </div>
       </div>
 
