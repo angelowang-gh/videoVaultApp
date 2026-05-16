@@ -443,7 +443,7 @@ if (fs.existsSync(DIST_DIR)) {
   app.use(express.static(DIST_DIR))
 }
 
-// --- SPA fallback (must be after all API routes) ---
+// --- SPA fallback for GET requests (must be after all API routes) ---
 app.get('*', (_req, res) => {
   const indexPath = path.join(DIST_DIR, 'index.html')
   if (fs.existsSync(indexPath)) {
@@ -451,6 +451,16 @@ app.get('*', (_req, res) => {
   } else {
     res.status(404).json({ success: false, error: 'Not found' })
   }
+})
+
+// --- Handle unmatched API routes (return JSON error) ---
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ success: false, error: `API endpoint not found: ${req.method} ${req.path}` })
+})
+
+// --- Handle all other unmatched routes ---
+app.use((req, res) => {
+  res.status(404).json({ success: false, error: `Not found: ${req.method} ${req.path}` })
 })
 
 app.listen(PORT, () => {

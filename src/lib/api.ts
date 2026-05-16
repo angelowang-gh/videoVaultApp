@@ -7,6 +7,33 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
     headers: { 'Content-Type': 'application/json' },
     ...options,
   })
+  
+  // Check if response is OK
+  if (!res.ok) {
+    // Try to parse error message from response
+    let errorMessage = `HTTP ${res.status}: ${res.statusText}`
+    try {
+      const contentType = res.headers.get('content-type')
+      if (contentType && contentType.includes('application/json')) {
+        const json: ApiResponse<T> = await res.json()
+        errorMessage = json.error || errorMessage
+      } else {
+        // Response is not JSON (e.g., HTML error page)
+        const text = await res.text()
+        // Try to extract meaningful error from HTML
+        if (text.includes('<!DOCTYPE') || text.includes('<html')) {
+          errorMessage = `Server returned an HTML page (${res.status}). The API endpoint may not be available.`
+        } else {
+          errorMessage = text.substring(0, 200) || errorMessage
+        }
+      }
+    } catch {
+      // If parsing fails, use status text
+      errorMessage = `HTTP ${res.status}: ${res.statusText}`
+    }
+    throw new Error(errorMessage)
+  }
+  
   const json: ApiResponse<T> = await res.json()
   if (!json.success) throw new Error(json.error || 'Request failed')
   return json.data as T
