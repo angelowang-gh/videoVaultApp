@@ -234,7 +234,7 @@ export function VideoCard({ video, onAddToPlaylist }: VideoCardProps) {
   )
 }
 
-export function VideoListItem({ video, onAddToPlaylist }: VideoCardProps) {
+export function VideoListItem({ video }: VideoCardProps) {
   const { tags } = useApp()
   const [showTagMenu, setShowTagMenu] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
@@ -246,15 +246,6 @@ export function VideoListItem({ video, onAddToPlaylist }: VideoCardProps) {
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.setData('videoId', video.id)
     e.dataTransfer.effectAllowed = 'copy'
-  }
-
-  // 添加到播放列表
-  const handleAddToPlaylist = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (onAddToPlaylist) {
-      onAddToPlaylist(video)
-    }
   }
 
   const handleOpenInPopup = (e: React.MouseEvent) => {
@@ -333,7 +324,7 @@ export function VideoListItem({ video, onAddToPlaylist }: VideoCardProps) {
               <Timer className="h-3 w-3" />
               {video.meta.duration && video.meta.duration > 0 
                 ? formatDuration(video.meta.duration)
-                : DURATION_LABELS[video.meta.durationCategory]}
+                : DURATION_LABELS[video.meta.durationCategory as keyof typeof DURATION_LABELS] || '未知'}
             </span>
           ) : (
             <span className="flex items-center gap-0.5 text-muted-foreground/60 italic">

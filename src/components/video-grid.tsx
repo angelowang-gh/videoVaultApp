@@ -183,21 +183,6 @@ export function VideoGrid() {
     return `${hours}小时${remainingMinutes > 0 ? `${remainingMinutes}分` : ''}`
   }
 
-  // 格式化时长辅助函数
-  const formatDuration = (seconds: number) => {
-    if (seconds < 60) {
-      return `${seconds}秒`
-    }
-    const minutes = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    if (minutes < 60) {
-      return `${minutes}:${secs.toString().padStart(2, '0')}`
-    }
-    const hours = Math.floor(minutes / 60)
-    const mins = minutes % 60
-    return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-  }
-
   const sortBar = (
     <div className="mb-2 flex items-center gap-3 flex-wrap">
       <span className="text-xs text-muted-foreground shrink-0">

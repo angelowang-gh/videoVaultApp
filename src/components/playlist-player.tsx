@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import type { VideoFile } from '@/lib/types'
-import { Play, Pause, SkipBack, SkipForward, ListVideo, X, Clock, Monitor, Smartphone, Timer, Maximize2, Volume2, VolumeX, ChevronRight, Check, Image as ImageIcon, Loader2 } from 'lucide-react'
+import { Play, Pause, SkipBack, SkipForward, ListVideo, X, Monitor, Smartphone, Volume2, VolumeX, ChevronRight, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatDuration } from '@/lib/utils'
 import { uploadThumbnail } from '@/lib/api'
@@ -25,19 +25,18 @@ export function PlaylistPlayerPage() {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [playbackRate, setPlaybackRate] = useState(1)
-  const [isFullscreen, setIsFullscreen] = useState(false)
   const [showPlaylist, setShowPlaylist] = useState(true)
   
   // 封面选取相关状态
   const [showCoverPicker, setShowCoverPicker] = useState(false)
   const [coverScreenshots, setCoverScreenshots] = useState<string[]>([])
   const [selectedCoverIndex, setSelectedCoverIndex] = useState<number | null>(null)
-  const [isCapturing, setIsCapturing] = useState(false)
+  // TODO: 封面截取功能未集成，暂时注释
+  // const [isCapturing, setIsCapturing] = useState(false)
   const [coverApplied, setCoverApplied] = useState(false)
   
   const videoRef = useRef<HTMLVideoElement>(null)
   const playerContainerRef = useRef<HTMLDivElement>(null)
-  const captureVideoRef = useRef<HTMLVideoElement | null>(null)
 
   // 当前视频（需要在 captureScreenshots 之前定义，避免 TDZ 错误）
   const currentVideo = playlist?.videos[currentVideoIndex]
@@ -159,26 +158,16 @@ export function PlaylistPlayerPage() {
     }
   }
 
-  const handleFullscreen = () => {
-    if (!playerContainerRef.current) return
-    
-    if (!document.fullscreenElement) {
-      playerContainerRef.current.requestFullscreen()
-      setIsFullscreen(true)
-    } else {
-      document.exitFullscreen()
-      setIsFullscreen(false)
-    }
-  }
-
   const handleSelectVideo = (index: number) => {
     setCurrentVideoIndex(index)
     setIsPlaying(true)
   }
 
   // 从当前视频中截取10张截图
+  // TODO: 此功能尚未集成到UI中，暂时注释
+  /*
   const captureScreenshots = useCallback(async () => {
-    if (!videoRef.current || duration <= 0) return
+    if (!videoRef.current || duration <= 0 || !currentVideo) return
     
     setIsCapturing(true)
     setCoverScreenshots([])
@@ -250,6 +239,7 @@ export function PlaylistPlayerPage() {
       setIsCapturing(false)
     }
   }, [currentVideo, duration])
+  */
 
   // 确认选择封面
   const applyCover = useCallback(async () => {
@@ -291,16 +281,6 @@ export function PlaylistPlayerPage() {
     const secs = Math.floor(seconds % 60)
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
-
-  // 监听全屏变化
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement)
-    }
-    
-    document.addEventListener('fullscreenchange', handleFullscreenChange)
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
-  }, [])
 
   // 键盘快捷键监听
   useEffect(() => {
@@ -632,14 +612,10 @@ export function PlaylistPlayerPage() {
                   </div>
                 </div>
                 
-                {isCapturing ? (
-                  <div className="flex items-center justify-center py-6 gap-2 text-xs text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    正在截取视频截图...
-                  </div>
-                ) : coverScreenshots.length === 0 ? (
+                {/* TODO: 封面截取功能未集成，暂时显示空状态 */}
+                {coverScreenshots.length === 0 ? (
                   <div className="text-xs text-muted-foreground py-4 text-center">
-                    截图失败，请重试
+                    暂无截图
                   </div>
                 ) : (
                   <>
