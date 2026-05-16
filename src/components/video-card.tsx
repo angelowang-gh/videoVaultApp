@@ -115,26 +115,7 @@ export function VideoCard({ video, onAddToPlaylist }: VideoCardProps) {
             {video.extension}
           </span>
         </div>
-        {/* Duration badge bottom-right */}
-        <div className="absolute bottom-2 right-2 pointer-events-none">
-          {video.meta.duration && video.meta.duration > 0 ? (
-            <span className="rounded-md bg-background/85 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground backdrop-blur-sm flex items-center gap-0.5">
-              <Timer className="h-2.5 w-2.5" />
-              {formatDuration(video.meta.duration)}
-            </span>
-          ) : video.meta.durationCategory ? (
-            <span className="rounded-md bg-background/85 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground backdrop-blur-sm flex items-center gap-0.5">
-              <Timer className="h-2.5 w-2.5" />
-              {DURATION_LABELS[video.meta.durationCategory]}
-            </span>
-          ) : (
-            <span className="rounded-md bg-background/85 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground/60 backdrop-blur-sm flex items-center gap-0.5 italic">
-              <Timer className="h-2.5 w-2.5" />
-              未提取
-            </span>
-          )}
-        </div>
-        
+
         {/* Play buttons bottom-left */}
         <div className="absolute bottom-2 left-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-smooth">
           <button
@@ -190,6 +171,19 @@ export function VideoCard({ video, onAddToPlaylist }: VideoCardProps) {
         </div>
 
         <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
+          {(video.meta.duration && video.meta.duration > 0) || video.meta.durationCategory ? (
+            <span className="flex items-center gap-1">
+              <Timer className="h-3 w-3" />
+              {video.meta.duration && video.meta.duration > 0 
+                ? formatDuration(video.meta.duration)
+                : DURATION_LABELS[video.meta.durationCategory!]}
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 text-muted-foreground/60 italic">
+              <Timer className="h-3 w-3" />
+              未提取
+            </span>
+          )}
           <span className="flex items-center gap-1">
             <HardDrive className="h-3 w-3" />
             {formatFileSize(video.size)}
