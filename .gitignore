@@ -4,3 +4,7 @@ dist-ssr
 *.local
 .DS_Store
 data/
+logs/
+*.log
+.env
+.env.local

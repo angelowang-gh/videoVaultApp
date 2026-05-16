@@ -1,0 +1,12 @@
+{
+  "_comment": "EdgeOne 源站配置示例 - 在 EdgeOne 控制台 → 站点配置 → 源站配置 中使用",
+  "originType": "IP",
+  "originAddress": "YOUR_CVM_PUBLIC_IP",
+  "originPort": 3001,
+  "weight": 100,
+  "protocol": "HTTP",
+  "hostHeader": "follow",
+  "timeout": 30,
+  "maxFailures": 3,
+  "failTimeout": 30
+}
