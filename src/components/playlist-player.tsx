@@ -251,14 +251,14 @@ export function PlaylistPlayerPage() {
     setPlaylist(updatedPlaylist)
     sessionStorage.setItem(playlist.id, JSON.stringify(updatedPlaylist))
     
-    // 上传封面到服务器（为当前播放的视频设置封面）
+    // 提交封面到服务器（为当前播放的视频设置封面）
     const currentVid = playlist.videos[currentVideoIndex]
     if (currentVid) {
       try {
         await uploadThumbnail(currentVid.id, coverDataUrl)
         invalidateThumbnailCache(currentVid.id)
       } catch (err) {
-        console.error('上传封面失败:', err)
+        console.error('提交封面失败:', err)
       }
     }
     

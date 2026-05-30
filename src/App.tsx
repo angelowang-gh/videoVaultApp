@@ -7,6 +7,7 @@ import { VideoPlayerPage } from '@/components/video-player'
 import { PlaylistPlayerPage } from '@/components/playlist-player'
 import { SettingsModal } from '@/components/settings-modal'
 import { ToastContainer } from '@/components/ui/toast'
+import { BrowserModeDemo } from '@/components/browser-mode-demo'
 import { useApp } from '@/lib/store'
 import { setDimensionFlushCallback, invalidateThumbnailCache } from '@/lib/thumbnail'
 
@@ -71,6 +72,7 @@ function App() {
           <Route path="/" element={<MainPage />} />
           <Route path="/video/:id" element={<PlayerPage />} />
           <Route path="/playlist/:id" element={<PlaylistPlayerPage />} />
+          <Route path="/browser-demo" element={<BrowserModeDemo />} />
         </Routes>
       </AppProvider>
     </BrowserRouter>

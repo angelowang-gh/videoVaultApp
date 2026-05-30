@@ -198,13 +198,13 @@ export function VideoPlayerPage() {
     
     const coverDataUrl = coverScreenshots[selectedCoverIndex]
     
-    // 上传封面到服务器
+    // 提交封面到服务器
     try {
       await uploadThumbnail(video.id, coverDataUrl)
       // 清除客户端缩略图缓存，使主页面刷新后获取新封面
       invalidateThumbnailCache(video.id)
     } catch (err) {
-      console.error('上传封面失败:', err)
+      console.error('提交封面失败:', err)
     }
     
     // 通过 postMessage 通知主窗口实时更新

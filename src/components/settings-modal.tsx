@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useApp } from '@/lib/store'
-import { X, FolderPlus, Trash2, Plus, Tag, FolderOpen, Globe, Clapperboard, Users } from 'lucide-react'
+import { X, FolderPlus, Trash2, Plus, Tag, FolderOpen, Globe, Clapperboard, Users, Upload } from 'lucide-react'
 import { Button } from './ui/button'
 import { TagBadge, ColorPicker } from './tag-badge'
 import { toast } from './ui/toast'
@@ -87,6 +87,8 @@ function ScanPathsSection({
 }) {
   const [newPath, setNewPath] = useState('')
   const [isAdding, setIsAdding] = useState(false)
+  const [isSelectingFolder, setIsSelectingFolder] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleAdd = async () => {
     if (!newPath.trim()) return
@@ -101,6 +103,72 @@ function ScanPathsSection({
     setIsAdding(false)
   }
 
+  // 处理浏览器文件夹选择
+  const handleFolderSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    setIsSelectingFolder(true)
+    try {
+      // 获取第一个文件的路径作为文件夹标识
+      const firstFile = files[0]
+      
+      // 尝试从 webkitRelativePath 提取文件夹名称
+      let folderName = 'Selected Folder'
+      if (firstFile.webkitRelativePath) {
+        const parts = firstFile.webkitRelativePath.split('/')
+        folderName = parts[0] || 'Selected Folder'
+      }
+
+      // 收集所有视频文件
+      const videoFiles: File[] = []
+      const videoExtensions = ['.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm', '.m4v', '.mpg', '.mpeg', '.3gp', '.ts']
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        const ext = '.' + file.name.split('.').pop()?.toLowerCase()
+        if (videoExtensions.includes(ext)) {
+          videoFiles.push(file)
+        }
+      }
+
+      if (videoFiles.length === 0) {
+        toast('No video files found in selected folder', 'error')
+        return
+      }
+
+      // 由于浏览器安全限制，我们无法直接添加文件夹路径到后端
+      // 这里我们提示用户使用手动输入路径的方式
+      toast(
+        `Found ${videoFiles.length} videos. Due to browser security, please use "Manual Path Input" to add this folder permanently.`,
+        'info'
+      )
+      
+      // 在控制台输出文件列表，方便调试
+      console.log('Selected folder:', folderName)
+      console.log('Video files found:', videoFiles.length)
+      console.log('Sample files:', videoFiles.slice(0, 5).map(f => ({
+        name: f.name,
+        size: f.size,
+        type: f.type
+      })))
+
+      // 提示用户如何获取路径
+      const hintMessage = `
+To add this folder permanently:\n1. Note the folder name: "${folderName}"\n2. Use "Manual Path Input" with the full path\n3. Or drag & drop videos directly into the app`
+      console.log(hintMessage)
+
+    } catch (err) {
+      console.error('Folder selection error:', err)
+      toast(err instanceof Error ? err.message : 'Failed to process folder', 'error')
+    } finally {
+      setIsSelectingFolder(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
+
   return (
     <section>
       <div className="flex items-center gap-2 mb-4">
@@ -112,19 +180,69 @@ function ScanPathsSection({
       </p>
 
       {/* Add new path */}
-      <div className="flex gap-2 mb-4">
-        <input
-          type="text"
-          placeholder="Enter folder path, e.g. D:\Videos"
-          value={newPath}
-          onChange={e => setNewPath(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleAdd()}
-          className="flex-1 h-9 rounded-lg border border-border bg-surface px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-smooth"
-        />
-        <Button onClick={handleAdd} disabled={isAdding || !newPath.trim()} size="sm">
-          <FolderPlus className="h-4 w-4 mr-1" />
-          Add
-        </Button>
+      <div className="space-y-3 mb-4">
+        {/* Browser folder selector */}
+        <div className="flex gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            // @ts-ignore - webkitdirectory is a non-standard but widely supported attribute
+            webkitdirectory=""
+            directory=""
+            multiple
+            onChange={handleFolderSelect}
+            className="hidden"
+            accept="video/*"
+          />
+          <Button 
+            onClick={() => fileInputRef.current?.click()} 
+            disabled={isSelectingFolder}
+            variant="outline"
+            className="flex-1 h-9"
+            title="Preview folder contents (cannot add permanently due to browser security)"
+          >
+            {isSelectingFolder ? (
+              <>
+                <Upload className="h-4 w-4 mr-2 animate-spin" />
+                Scanning...
+              </>
+            ) : (
+              <>
+                <Upload className="h-4 w-4 mr-2" />
+                Preview Folder (Browser)
+              </>
+            )}
+          </Button>
+        </div>
+
+        <div className="relative flex items-center py-2">
+          <div className="flex-grow border-t border-border"></div>
+          <span className="flex-shrink-0 mx-4 text-xs text-muted-foreground">OR</span>
+          <div className="flex-grow border-t border-border"></div>
+        </div>
+
+        {/* Manual path input */}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            placeholder="Enter folder path, e.g. D:\Videos"
+            value={newPath}
+            onChange={e => setNewPath(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleAdd()}
+            className="flex-1 h-9 rounded-lg border border-border bg-surface px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-smooth"
+          />
+          <Button onClick={handleAdd} disabled={isAdding || !newPath.trim()} size="sm">
+            <FolderPlus className="h-4 w-4 mr-1" />
+            Add
+          </Button>
+        </div>
+      </div>
+
+      {/* Info note */}
+      <div className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+        <p className="text-xs text-amber-600 dark:text-amber-400">
+          <strong>⚠️ Browser Limitation:</strong> Due to browser security restrictions, folder selection cannot directly add paths to the system. Use this to preview folder contents, then use "Manual Path Input" with the full path (e.g., C:\Videos) for permanent access.
+        </p>
       </div>
 
       {/* Path list */}
